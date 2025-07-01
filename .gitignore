@@ -35,5 +35,4 @@ build.ninja
 # Other
 *.log
 
-*build/
-**build/
+build*/
