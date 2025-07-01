@@ -1,2 +1,1 @@
-# OneDayCode
-Small one-day projects.
+calculator
