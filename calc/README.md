@@ -2,8 +2,6 @@
 
 A simple calculator application built with **Qt** and **C++11**. It supports basic arithmetic operations, percent and sign toggling, input validation, and both **mouse click** and **keyboard** interaction.
 
-![Project Preview](public/calc.png)
-
 ## Features
 
 * Basic operations: addition, subtraction, multiplication, division
@@ -16,7 +14,7 @@ A simple calculator application built with **Qt** and **C++11**. It supports bas
 
 ## Screenshots
 
-> *(Add screenshots of the UI if available)*
+![Project Preview](public/calc.png)
 
 ## Build Instructions
 
