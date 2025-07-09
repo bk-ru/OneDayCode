@@ -1,7 +1,3 @@
-Here is a sample `README.md` in English for your Qt C++11 calculator project:
-
----
-
 # Qt Calculator
 
 A simple calculator application built with **Qt** and **C++11**. It supports basic arithmetic operations, percent and sign toggling, input validation, and both **mouse click** and **keyboard** interaction.
