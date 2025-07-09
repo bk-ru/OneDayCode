@@ -34,7 +34,7 @@ private slots:
 
 private slots:
     void on_buttonDel_clicked();
-    void on_buttonClear_clicked();
+    void on_buttonC_clicked();
 
 private slots:
     void on_operPercent_clicked();

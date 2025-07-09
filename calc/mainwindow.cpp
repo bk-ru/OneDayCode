@@ -91,14 +91,13 @@ void MainWindow::on_operEqual_clicked()
     if (!_hasStoredNum || displayStr.isEmpty())
         return;
 
-
     calcResult();
     _hasStoredNum = false;
     _operClicked = false;
 }
 
 
-void MainWindow::on_buttonClear_clicked()
+void MainWindow::on_buttonC_clicked()
 {
     ui->displayRes->clear();
     _operClicked = false;
@@ -225,7 +224,7 @@ void MainWindow::keyPressEvent(QKeyEvent *e) {
             on_buttonDel_clicked();
             break;
         case Qt::Key_Delete:
-            on_buttonClear_clicked();
+            on_buttonC_clicked();
             break;
         //Percentage
         case Qt::Key_Percent:
