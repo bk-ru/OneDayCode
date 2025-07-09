@@ -66,11 +66,3 @@ make
 
 This project is licensed under the MIT License. See `LICENSE` for details.
 
-## Author
-
-Your Name – [your.email@example.com](mailto:your.email@example.com)
-
----
-
-Let me know if you'd like it tailored to a specific style (e.g., professional, educational, minimalist) or translated into Russian.
-
