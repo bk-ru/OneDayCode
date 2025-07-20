@@ -1,12 +1,6 @@
-Here is a sample `README.md` in English for your Qt C++11 calculator project:
-
----
-
 # Qt Calculator
 
 A simple calculator application built with **Qt** and **C++11**. It supports basic arithmetic operations, percent and sign toggling, input validation, and both **mouse click** and **keyboard** interaction.
-
-![Project Preview](public/preview.jpg)
 
 ## Features
 
@@ -20,7 +14,7 @@ A simple calculator application built with **Qt** and **C++11**. It supports bas
 
 ## Screenshots
 
-> *(Add screenshots of the UI if available)*
+![Project Preview](public/calc.png)
 
 ## Build Instructions
 
@@ -64,13 +58,5 @@ make
 
 ## License
 
-This project is licensed under the MIT License. See `LICENSE` for details.
-
-## Author
-
-Your Name – [your.email@example.com](mailto:your.email@example.com)
-
----
-
-Let me know if you'd like it tailored to a specific style (e.g., professional, educational, minimalist) or translated into Russian.
+This project is licensed under the MIT License.
 
