@@ -7,10 +7,12 @@
 Config::Config(QObject *parent)
     : QObject(parent)
 {
+
 }
 
 Config::~Config()
 {
+
 }
 
 bool Config::load(const QString &filePath)
@@ -28,6 +30,7 @@ bool Config::load(const QString &filePath)
 
     QByteArray data = configFile.readAll();
     QJsonDocument doc = QJsonDocument::fromJson(data);
+
     if (doc.isNull()) {
         qWarning() << "Ошибка при разборе JSON!";
         return false;
@@ -46,6 +49,8 @@ void Config::setSettings(const QJsonDocument &doc)
         m_host = jsonObject["host"].toString();
     if (jsonObject.contains("port") && jsonObject["port"].isDouble())
         m_port = static_cast<quint16>(jsonObject["port"].toInt());
+    if (jsonObject.contains("maxMessageSize") && jsonObject["maxMessageSize"].isDouble())
+        m_maxMesssageSize = static_cast<quint32>(jsonObject["maxMessageSize"].toInt());
 }
 
 const QString& Config::getHost() const
@@ -53,7 +58,14 @@ const QString& Config::getHost() const
     return m_host;
 }
 
-quint16 Config::getPort() const
+quint16 Config::getPort()
 {
     return m_port;
 }
+
+quint32 Config::getMaxMessageSize()
+{
+    return m_maxMesssageSize;
+}
+
+

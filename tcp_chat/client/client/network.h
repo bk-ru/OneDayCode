@@ -2,7 +2,6 @@
 #define NETWORK_H
 
 #include <QDialog>
-#include "socket.h"
 
 namespace Ui {
 class Network;
@@ -13,7 +12,7 @@ class Network : public QDialog
     Q_OBJECT
 
 public:
-    explicit Network(QWidget *parent = nullptr);
+    explicit Network(QWidget *parent = nullptr, bool m_debug = true);
     ~Network();
 
 public:
@@ -21,8 +20,8 @@ public:
     void setPort(quint16 port);
 
 signals:
-    void connectRequested(const QString& host, quint16 port);
-    void disconnected();
+    void signalConnected(const QString& host, quint16 port);
+    void signalDisconnected();
 
 private slots:
     void on_connect_clicked();
@@ -30,7 +29,7 @@ private slots:
 
 private:
     Ui::Network *ui;
-    Socket *m_socket{nullptr};
+    bool m_debug{true};
 };
 
 #endif // NETWORK_H

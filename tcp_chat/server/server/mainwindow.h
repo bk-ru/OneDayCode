@@ -22,7 +22,7 @@ public:
 
 private:
     template<typename DialogType>
-    void ensureDialogVisible(QPointer<DialogType> &dialog, QWidget* parent);
+    bool ensureDialogVisible(QPointer<DialogType> &dialog, QWidget* parent);
 
 private slots:
     void reloadConStatus(const QString& status);
@@ -31,6 +31,12 @@ private slots:
     void on_network_clicked();
     void on_send_clicked();
     void on_history_clicked();
+
+private slots:
+    void updateClientsTable();
+
+private slots:
+    void textToBrowser(Server::MessageType type, const QString& message);
 
 private:
     Ui::MainWindow *ui;

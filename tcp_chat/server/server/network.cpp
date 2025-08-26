@@ -6,16 +6,25 @@
 
 Network::Network(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::Network),
-    m_server(Server::instance()) // Используем Singleton без явного удаления
+    ui(new Ui::Network)
 {
     ui->setupUi(this);
-    this->setWindowTitle("Network (Server)");
+    this->setWindowTitle("Network");
 }
 
 Network::~Network()
 {
     delete ui;
+}
+
+void Network::setHost(const QString &host)
+{
+    ui->host->setText(host);
+}
+
+void Network::setPort(quint16 port)
+{
+    ui->port->setText(QString::number(port));
 }
 
 void Network::on_connect_clicked()
@@ -32,30 +41,10 @@ void Network::on_connect_clicked()
         return;
     }
 
-    // Если сервер уже запущен, информируем пользователя
-    if (m_server->isRunning()) {
-        QMessageBox::information(this, "Инфо", "Сервер уже запущен");
-        return;
-    }
-
-    // Попытка запуска сервера
-    if (!m_server->start(host, port)) {
-        QMessageBox::critical(this, "Ошибка", "Не удалось запустить сервер");
-        return;
-    }
-
-    QMessageBox::information(this, "Инфо", "Сервер запущен");
+    emit signalConnected(host, port);
 }
 
 void Network::on_disconnect_clicked()
 {
-    if (!m_server->isRunning()) {
-        QMessageBox::information(this, "Инфо", "Сервер не запущен");
-        return;
-    }
-
-    m_server->stop(); // Останавливаем сервер
-    QMessageBox::information(this, "Инфо", "Сервер остановлен");
-
-    emit disconnected(); // Генерируем сигнал о завершении работы
+    emit signalDisconnected();
 }

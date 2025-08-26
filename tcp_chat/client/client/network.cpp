@@ -4,9 +4,9 @@
 #include <QMessageBox>
 #include <QDebug>
 
-Network::Network(QWidget *parent) :
+Network::Network(QWidget *parent, bool m_debug) :
     QDialog(parent),
-    ui(new Ui::Network), m_socket(Socket::instance())
+    ui(new Ui::Network)
 {
     ui->setupUi(this);
     this->setWindowTitle("Network (Client)");
@@ -41,43 +41,11 @@ void Network::on_connect_clicked()
         return;
     }
 
-    if (m_socket && m_socket->isConnected()) {
-        QMessageBox::information(this, "Инфо", "Вы уже подключены");
-        return;
-    }
-
-    if (m_socket)
-        m_socket->connectToHost(host, port);
-    else {
-        qDebug() << "socket не инициализирован";
-        return;
-    }
-
-    QTimer::singleShot(100, [this]() {
-        if (m_socket->isConnected()) {
-            QMessageBox::information(this, "Инфо", "Успешное подключение");
-        } else
-            QMessageBox::information(this, "Инфо", "Не удалось подключиться");
-    });
-
+    emit signalConnected(host, port);
 }
 
 
 void Network::on_disconnect_clicked()
 {
-
-    if (!m_socket) {
-        qDebug() << "socket не инициализирован";
-        return;
-    }
-
-    if (!m_socket->isConnected()) {
-        QMessageBox::information(this, "Инфо", "Вы не подключены");
-        return;
-    }
-
-    m_socket->disconnectFromHost();
-
-    QMessageBox::information(this, "Инфо", "Успешное отключение");
-    emit disconnected();
+    emit signalDisconnected();
 }

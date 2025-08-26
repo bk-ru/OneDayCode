@@ -6,19 +6,26 @@
 #include <QTimer>
 #include <QUuid>
 
-struct MessagePacket {
-    quint32 messageType;  // Тип сообщения
+enum class ClientMessageType : quint16 {
+    AUTH = 0,
+    TEXT = 1,
+    FILE = 2,
+    IMAGE = 3
+};
+
+#pragma pack(push, 1)
+struct NetworkMessage {
+    quint16 messageType;  // Тип сообщения
     QUuid userId;         // Уникальный идентификатор пользователя
     quint32 messageSize;  // Размер сообщения (без заголовка)
-    QByteArray messageData;  // Данные сообщения
 };
+#pragma pack(pop)
 
 class Socket : public QObject
 {
     Q_OBJECT
 public:
     static Socket* instance(QObject *parent = nullptr, bool debug = false);
-
     ~Socket() override;
 
 private:
@@ -27,15 +34,23 @@ private:
 
 public:
     void setUserId(const QUuid& id);
+    void updateUserId(const QUuid& newId);
+
 public:
     void connectToHost(const QString &host, quint16 port);
     void disconnectFromHost();
-    void sendMessage(const QString &message, const QUuid& userId);
-    void sendMessage(const QUuid& userId);
-    void sendMessage(const QByteArray &data);
+
+public:
+    void sendBinaryData(ClientMessageType type, const QUuid &userId, const QByteArray &data);
+    void sendAuthMessage(const QUuid &userId);
+    void sendTextMessage(const QString &message, const QUuid &userId);
+    void sendMessage(ClientMessageType type, const QUuid &userId, const QByteArray &data = QByteArray());
+
+public:
     bool isConnected() const;
 
 signals:
+    void signalAuthSuccess(const QUuid& userId);
     void signalConnected();
     void signalDisconnected();
     void signalErrorOccurred(const QString &error);
@@ -52,11 +67,11 @@ private slots:
 
 private:
     QTcpSocket *m_socket{nullptr};
-    QUuid m_myId{"32513efb-11e7-488d-90ea-9ca6c157b76e"};
+    QUuid m_myId{QUuid::createUuid()};
     QByteArray m_buffer{QByteArray()};
-    MessagePacket m_expectedMsg;
+    NetworkMessage m_expectedMsg;
     bool m_debug{false};
-
+    int HEADER_SIZE = sizeof(NetworkMessage);
 };
 
 #endif // SOCKET_H

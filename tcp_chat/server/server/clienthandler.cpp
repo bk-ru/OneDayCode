@@ -1,8 +1,8 @@
 #include "clienthandler.h"
 #include <QDataStream>
 
-ClientHandler::ClientHandler(QTcpSocket *socket, QObject *parent, bool debug)
-    : QObject(parent), m_socket(socket), m_debug(debug)
+ClientHandler::ClientHandler(QTcpSocket *socket, QObject *parent, bool debug, quint32 maxMessageSize)
+    : QObject(parent), m_socket(socket), m_debug(debug), m_maxMessageSize(maxMessageSize)
 {
     connect(m_socket, &QTcpSocket::readyRead, this, &ClientHandler::onReadyRead);
     connect(m_socket, &QTcpSocket::disconnected, this, &ClientHandler::onDisconnected);
@@ -15,14 +15,19 @@ ClientHandler::~ClientHandler()
     }
 }
 
+void ClientHandler::disconnectFromHost()
+{
+    m_socket->disconnectFromHost();
+}
+
 const QUuid& ClientHandler::getId() const
 {
     return m_id;
 }
 
-void ClientHandler::setId(const QUuid &id)
+const QString ClientHandler::getPeerAddress() const
 {
-    m_id = id;
+    return m_socket->peerAddress().toString();
 }
 
 bool ClientHandler::isValid() const
@@ -39,6 +44,28 @@ void ClientHandler::sendData(const QByteArray &data)
     }
 }
 
+void ClientHandler::sendMessage(const QString& message)
+{
+    if (!isConnected())
+        return;
+
+    QByteArray data = message.toUtf8();
+
+    QByteArray packet;
+    QDataStream out(&packet, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_15); // Добавьте эту строку
+
+    out << static_cast<quint16>(ClientMessageType::TEXT);
+    out << m_id;
+    out << static_cast<quint32>(data.size());
+    out.writeRawData(data.constData(), data.size());
+
+    m_socket->write(packet);
+
+    if (m_debug)
+        qDebug() << "Сообщение отправлено клиенту" << m_id << ":" << message;
+}
+
 void ClientHandler::sendDontAuthorize()
 {
     if (!isConnected())
@@ -46,61 +73,86 @@ void ClientHandler::sendDontAuthorize()
 
     QByteArray packet;
     QDataStream out(&packet, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_15); // Добавьте эту строку
 
-    out << quint32(0);
-    out << m_expectedMsg.userId;
-    out << 0;
+    out << static_cast<quint16>(ClientMessageType::AUTH);
+    out << QUuid();  // Пустой ID как индикатор ошибки
+    out << static_cast<quint32>(0);  // Нет данных
 
     m_socket->write(packet);
 
-    if (m_debug) {
-        qDebug() << "Отправлено сообщение авторизации для:" << m_expectedMsg.userId;
-    }
+    if (m_debug)
+        qDebug() << "Отправлен ответ об ошибке авторизации клиенту" << m_id;
 }
 
 void ClientHandler::onReadyRead()
 {
     m_buffer.append(m_socket->readAll());
-    QDataStream in(&m_buffer, QIODevice::ReadOnly);
-    qDebug() << "Пришло:" << m_buffer.size() << m_expectedMsg.messageSize;
 
     while (true) {
-        if (m_expectedMsg.messageSize == 0) {
-            if (m_buffer.size() < sizeof(quint32) * 2 + sizeof(QUuid))
-                return;  // Ждем, пока не придет достаточно данных для заголовка
+        quint32 expectedHeaderSize = sizeof(quint16) + sizeof(QUuid) + sizeof(quint32);
 
-            in >> m_expectedMsg.messageType >> m_expectedMsg.userId >> m_expectedMsg.messageSize;
+        if (m_buffer.size() < expectedHeaderSize)
+            return;
+
+        QDataStream in(&m_buffer, QIODevice::ReadOnly);
+        in.setVersion(QDataStream::Qt_5_15); // Добавьте эту строку
+        quint16 messageType;
+        QUuid userId;
+        quint32 messageSize;
+
+        in >> messageType >> userId >> messageSize;
+
+        if (messageSize > m_maxMessageSize) {
+            qCritical() << "Превышен максимальный размер сообщения:" << messageSize;
+            m_socket->close();
+            return;
         }
 
-        if (m_buffer.size() < sizeof(quint32) * 2 + sizeof(QUuid) + m_expectedMsg.messageSize)
-            return;  // Ждем, пока не придет все сообщение
+        quint32 fullMessageSize = expectedHeaderSize + messageSize;
+        if (m_buffer.size() < fullMessageSize)
+            return;
 
-        QByteArray messageData;
-        messageData.resize(m_expectedMsg.messageSize);
-        in.readRawData(messageData.data(), m_expectedMsg.messageSize);
+        QByteArray messageData = m_buffer.mid(expectedHeaderSize, messageSize);
 
-        switch (m_expectedMsg.messageType) {
-            case 0:
-                emit signalAuthorize(m_id, m_expectedMsg.userId);
-                m_id = m_expectedMsg.userId;
-                break;
-            case 1:
-                emit signalMessageReceived(m_expectedMsg.userId, QString::fromUtf8(messageData));  // Отправляем вместе с UUID
-                // Обработка изображения
-                break;
-            case 2:
-                // Обработка файла
-                break;
-            case 3:
-                // Обработка файла
-                break;
-            default:
-                qWarning() << "Неизвестный тип сообщения";
-                break;
+        NetworkMessage header;
+        header.messageType = messageType;
+        header.userId = userId;
+        header.messageSize = messageSize;
+
+        processMessage(header, messageData);
+
+        m_buffer = m_buffer.mid(fullMessageSize);
+    }
+}
+
+void ClientHandler::processMessage(const NetworkMessage& header, const QByteArray& data)
+{
+    if (m_debug) {
+        qDebug() << "=== ClientHandler::processMessage ===";
+        qDebug() << "Тип сообщения:" << header.messageType;
+        qDebug() << "ID пользователя:" << header.userId.toString();
+        qDebug() << "Размер данных:" << header.messageSize;
+        if (!data.isEmpty()) {
+            qDebug() << "Данные:" << QString::fromUtf8(data);
         }
+    }
 
-        m_buffer = m_buffer.mid(sizeof(quint32) * 2 + sizeof(QUuid) + m_expectedMsg.messageSize);
-        m_expectedMsg.messageSize = 0;
+    switch (static_cast<ClientMessageType>(header.messageType)) {
+        case ClientMessageType::AUTH:
+            if (m_debug)
+                qDebug() << "Обработка AUTH от" << header.userId.toString();
+            emit signalAuthorize(m_id, header.userId);
+            m_id = header.userId;
+            break;
+        case ClientMessageType::TEXT:
+            if (m_debug)
+                qDebug() << "Обработка TEXT от" << header.userId.toString();
+            emit signalStrMessageReceived(header.userId, QString::fromUtf8(data));
+            break;
+        default:
+            qWarning() << "Неизвестный тип сообщения:" << header.messageType;
+            break;
     }
 }
 
@@ -111,5 +163,5 @@ bool ClientHandler::isConnected()
 
 void ClientHandler::onDisconnected()
 {
-    emit disconnected(m_id);
+    emit signalDisconnected(m_id);
 }

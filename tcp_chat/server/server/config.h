@@ -18,12 +18,14 @@ public:
 
 public:
     const QString& getHost() const;
-    quint16 getPort() const;
+    quint16 getPort();
+    quint32 getMaxMessageSize();
 
 private:
     QString m_filePath;
     QString m_host{"127.0.0.1"};
     quint16 m_port{12345};
+    quint32 m_maxMesssageSize{10*1024*1024}; // 10 MB
 };
 
 #endif // CONFIG_H

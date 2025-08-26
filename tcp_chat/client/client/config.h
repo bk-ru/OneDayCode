@@ -22,6 +22,9 @@ public:
     quint16 getPort() const;
     const QUuid& getId() const;
 
+public:
+    void setId(const QUuid &newId);
+
 private:
     QString m_filePath{"client.json"};
     QString m_host{"127.0.0.1"};

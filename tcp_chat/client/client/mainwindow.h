@@ -24,13 +24,20 @@ private:
     template<typename DialogType>
     void ensureDialogVisible(QPointer<DialogType> &dialog, QWidget* parent);
 
+private:
+    void onAuthSuccess(const QUuid& userId);
+
 private slots:
-    void reloadConStatus(const QString& status);
+    void onReloadConStatus(const QString& status);
+
+private slots:
+    void onMessageReceived(const QUuid& userId, const QString& message);
 
 private slots:
     void on_network_clicked();
     void on_send_clicked();
     void on_history_clicked();
+    void on_newID_clicked();
 
 private:
     Ui::MainWindow *ui;

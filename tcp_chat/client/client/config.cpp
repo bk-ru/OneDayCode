@@ -65,3 +65,8 @@ const QUuid &Config::getId() const
 {
     return m_myId;
 }
+
+void Config::setId(const QUuid &newId)
+{
+    m_myId = newId;
+}
