@@ -14,7 +14,7 @@ A simple calculator application built with **Qt** and **C++11**. It supports bas
 
 ## Screenshots
 
-![Project Preview](public/chat.png)
+![Project Preview](public/calc.png)
 
 ## Build Instructions
 
