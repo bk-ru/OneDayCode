@@ -4,7 +4,7 @@
 
 ## Screenshots
 
-![Project Preview](public/tcp_chat.png)
+![Project Preview](public/chat.png)
 
 ## 🚀 Функциональность
 
