@@ -33,28 +33,19 @@ void MainWindow::onReloadConStatus(const QString &status)
 
 void MainWindow::onAuthSuccess(const QUuid& userId)
 {
-    if (m_debug) {
+    if (m_debug)
         qDebug() << "Успешная авторизация с ID:" << userId.toString();
-    }
     ui->myID->setText(userId.toString(QUuid::WithoutBraces));
 }
 
 void MainWindow::onMessageReceived(const QUuid& userId, const QString& message)
 {
-    // Сохраняем текущий цвет
     QColor oldColor = ui->textBrowser->textColor();
-
-    // Устанавливаем цвет для входящих сообщений (синий)
-    ui->textBrowser->setTextColor(QColor(33, 150, 243)); // Синий
-
+    ui->textBrowser->setTextColor(Qt::black);
     QString senderId = userId.toString(QUuid::WithoutBraces).left(8);
     QString displayMessage = QString("[%1]: %2").arg(senderId).arg(message);
-
     ui->textBrowser->append(displayMessage);
-
-    // Восстанавливаем исходный цвет
     ui->textBrowser->setTextColor(oldColor);
-
     QTextCursor cursor = ui->textBrowser->textCursor();
     cursor.movePosition(QTextCursor::End);
     ui->textBrowser->setTextCursor(cursor);
@@ -77,19 +68,11 @@ void MainWindow::on_send_clicked()
     QString message = ui->textSend->toPlainText();
     if (!message.isEmpty()) {
         m_socket->sendTextMessage(message, m_config->getId());
-
-        // Сохраняем текущий цвет
         QColor oldColor = ui->textBrowser->textColor();
-
-        // Устанавливаем цвет для исходящих сообщений (зеленый)
-        ui->textBrowser->setTextColor(QColor(76, 175, 80)); // Зеленый
-
+        ui->textBrowser->setTextColor(Qt::darkGray);
         QString displayMessage = QString("[Я]: %1").arg(message);
         ui->textBrowser->append(displayMessage);
-
-        // Восстанавливаем исходный цвет
         ui->textBrowser->setTextColor(oldColor);
-
         ui->textSend->clear();
     }
 }
@@ -98,24 +81,15 @@ void MainWindow::on_newID_clicked()
 {
     QUuid oldId = m_config->getId();
     QUuid newId = QUuid::createUuid();
-
     m_config->setId(newId);
     m_socket->updateUserId(newId);
-
-    // Сохраняем текущий цвет
     QColor oldColor = ui->textBrowser->textColor();
-
-    // Устанавливаем цвет для системных сообщений (оранжевый)
-    ui->textBrowser->setTextColor(QColor(255, 152, 0)); // Оранжевый
-
+    ui->textBrowser->setTextColor(Qt::black);
     QString displayMessage = QString("[Система]: ID обновлен с %1 на %2")
                                 .arg(oldId.toString(QUuid::WithoutBraces).left(8))
                                 .arg(newId.toString(QUuid::WithoutBraces).left(8));
     ui->textBrowser->append(displayMessage);
-
-    // Восстанавливаем исходный цвет
     ui->textBrowser->setTextColor(oldColor);
-
     ui->myID->setText(newId.toString(QUuid::WithoutBraces));
 }
 
@@ -135,3 +109,9 @@ void MainWindow::ensureDialogVisible(QPointer<DialogType> &dialog, QWidget *pare
         dialog->show();
     }
 }
+
+void MainWindow::on_clearChat_clicked()
+{
+    ui->textBrowser->clear();
+}
+

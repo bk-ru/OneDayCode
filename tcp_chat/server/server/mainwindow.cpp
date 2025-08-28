@@ -38,7 +38,6 @@ void MainWindow::updateClientsTable()
         QTableWidgetItem* idItem = new QTableWidgetItem(client.id.toString(QUuid::WithoutBraces).left(8));
         idItem->setData(Qt::UserRole, client.id);
         ui->ClientTable->setItem(row, 0, idItem);
-
         ui->ClientTable->setItem(row, 1, new QTableWidgetItem(client.ip));
         ui->ClientTable->setItem(row, 2, new QTableWidgetItem(client.connectTime.toString("yyyy-MM-dd hh:mm:ss")));
     }
@@ -85,16 +84,6 @@ void MainWindow::on_network_clicked()
     }
 }
 
-void MainWindow::on_send_clicked()
-{
-
-}
-
-void MainWindow::on_history_clicked()
-{
-
-}
-
 template<typename DialogType>
 bool MainWindow::ensureDialogVisible(QPointer<DialogType> &dialog, QWidget *parent)
 {
@@ -108,3 +97,10 @@ bool MainWindow::ensureDialogVisible(QPointer<DialogType> &dialog, QWidget *pare
         return false;
     }
 }
+
+
+void MainWindow::on_clearChat_clicked()
+{
+    ui->textBrowser->clear();
+}
+

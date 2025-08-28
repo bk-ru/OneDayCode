@@ -39,6 +39,8 @@ private slots:
     void on_history_clicked();
     void on_newID_clicked();
 
+    void on_clearChat_clicked();
+
 private:
     Ui::MainWindow *ui;
     Socket *m_socket{nullptr};

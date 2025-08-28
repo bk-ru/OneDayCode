@@ -64,6 +64,7 @@ private slots:
     void onDisconnected();
     void onReadyRead();
     void onErrorOccurred(QAbstractSocket::SocketError socketError);
+    void onStateChanged(QAbstractSocket::SocketState socketState);
 
 private:
     QTcpSocket *m_socket{nullptr};

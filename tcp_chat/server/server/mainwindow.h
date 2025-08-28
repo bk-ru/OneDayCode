@@ -29,14 +29,14 @@ private slots:
 
 private slots:
     void on_network_clicked();
-    void on_send_clicked();
-    void on_history_clicked();
 
 private slots:
     void updateClientsTable();
 
 private slots:
     void textToBrowser(Server::MessageType type, const QString& message);
+
+    void on_clearChat_clicked();
 
 private:
     Ui::MainWindow *ui;
